@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "dom-parser": "^0.1.6",
+    "jsdom": "^18.0.0",
+    "mecab-ya": "^0.1.1",
+    "node-html-parser": "^5.0.0",
+    "request": "^2.88.2"
+  }
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js" type="text/JavaScript"></script>
+
+</head>
+<body>
+    <script>
+        const width = 300;
+        const height = 200;
+                
+        d3.csv("lan_data.csv", data => show(data));
+
+        function show(data) {
+            d3.layout
+                .cloud()
+                .size([width, height])
+                .words(data)
+                .rotate(function (d) { return Math.random() * 360; })
+                .fontSize((d) => d.frequency)
+                .on("end", draw)
+                .start();
+        }
+
+        function draw(words) { 
+            d3.select("body")
+                .append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                .append("g")
+                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+                .selectAll("text")
+                    .data(words)
+                .enter().append("text")
+                    .style("fill", function (d) {
+                        if (parseInt(d.frequency) > parseInt(20)) return "#dd3333";
+                        else if (parseInt(d.frequency) > parseInt(15)) return "#8224e3";
+                        else if (parseInt(d.frequency) > parseInt(10)) return "#81d742";
+                        else if (parseInt(d.frequency) > parseInt(9)) return "#00c280";
+                        else if (parseInt(d.frequency) > parseInt(8)) return "#1e73be";
+                        else if (parseInt(d.frequency) > parseInt(5)) return "#dd9933";
+                        else if (parseInt(d.frequency) > parseInt(3)) return "#626208";
+                        else "#025275";
+                    })
+                    .style("font-family", "Impact")
+                    .attr("text-anchor", "middle")
+                    .style("font-size", (d) => d.size + "px")
+                    .attr("transform", (d) => "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")")
+                    .text((d) => d.text)
+        }
+        </script>
+</body>
+</html>
