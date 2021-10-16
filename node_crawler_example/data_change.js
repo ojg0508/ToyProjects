@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-//changeToCsv();
 module.exports.changeToCsv = changeToCsv;
 
 function changeToCsv(filePath, fileName) {
@@ -34,10 +33,4 @@ function changeToCsv(filePath, fileName) {
         });
         writeStream.end();
     });
-}
-
-function readData(fileName) {
-    const readFileName = path.join(__dirname, fileName);
-    const readData = fs.readFileSync(readFileName);
-    return JSON.parse(readData.toString());
 }

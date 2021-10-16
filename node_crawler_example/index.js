@@ -217,36 +217,3 @@ function removeLastSlash(url) {
         return url;
     }
 }
-
-
-
-
-
-
-
-// testFunc();
-async function testFunc() {
-    console.log(seedUrl);
-    await mecabUrlPage(seedUrl);
-    console.log(mecabResult);
-}
-
-    // const options = {
-    //     url: url,
-    //     headers: { 'Content-Type': 'content=text/html; charset=utf-8'},
-    //     method: 'GET',
-    //     encoding: null,
-    //     timeout: 10000,
-    // };
-
-
-    // 단어만 찾아주는 nouns 하지만 영어는 찾아주진 않는다.
-    // mecab.nouns(root.querySelector('body').innerText, function (err, result) {
-    // mecab.nouns("test 오재근입니다. 안녕하세요. 이건 꽃인가", function (err, result) {
-    //     result.forEach(value=>{
-    //         if (!mecabResult[value]) mecabResult[value] = 1;
-    //         else mecabResult[value]++;
-        
-    //     });
-    //         console.log(mecabResult["꽃"]);
-    // });
