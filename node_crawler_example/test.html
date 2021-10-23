@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        table, th, td {
+  border: 1px solid black;
+}
+    </style>
+</head>
+
+<body>
+    <div>
+        <label><input type="checkbox" id="한글" value="한글" checked>한글</label>
+        <label><input type="checkbox" id="영어" value="영어">영어</label>
+        <label><input type="checkbox" id="숫자" value="숫자">숫자</label>
+        <label><input type="checkbox" id="한자" value="한자">한자</label>
+    </div>
+    <div>
+        <input id='search_url' />
+        <input type="button" value='button' onClick="searchUrl();" />
+        <input type="button" value='analize' onClick="analize();" />
+        <ul id='sitemap_url'></ul>
+        <table id='result'>
+            <thead>
+                <tr>
+                    <th>단어</th>
+                    <th>횟수</th>
+                </tr>
+            </thead>
+            <tbody id='result_tbody'>
+            </tbody>
+        </table>
+    </div>
+
+    
+    <script>
+        async function searchUrl() {
+            console.log('searchUrl');
+            const url = document.querySelector('#search_url')?.value;
+            console.log(document.querySelector('#한글')?.checked);
+
+            const data = {
+                "url": url,
+            }
+            postData('/search', data).then(res => {
+                res.forEach(element => {
+                    const liTag = document.createElement('li');
+                    liTag.innerText = element;
+                    document.querySelector('#sitemap_url').appendChild(liTag)
+                });
+                console.log(res)
+            });
+        }
+
+        async function analize() {
+            console.log('analize');
+            let trs = document.querySelectorAll("#result_tbody tr");
+            trs?.forEach(el=>el.remove());
+
+            const url = document.querySelector('#search_url')?.value;
+
+            const data = {
+                url: url,
+                option: {
+                    ko: document.querySelector('#한글')?.checked,
+                    en: document.querySelector('#영어')?.checked,
+                    han: document.querySelector('#한자')?.checked,
+                    num: document.querySelector('#숫자')?.checked,
+                }
+            }
+
+            postData('/analize', data).then(res => {
+                let resultTbody = document.querySelector('#result_tbody');
+
+                for(let key in res) {
+                    let word = document.createElement('td');
+                    let num = document.createElement('td');
+                    let tr = document.createElement('tr');
+                    word.innerText = res[key][0];
+                    num.innerText = res[key][1];
+                    console.log(key);
+                    tr.appendChild(word);
+                    tr.appendChild(num);
+                    resultTbody.appendChild(tr)
+                    // // liTag.innerText = key + " : " + res[key];
+                    
+                }
+                // document.querySelector('#result').innerText = res;
+                console.log(res)
+            });
+        }
+
+        async function postData(url = '', data = {}) {
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify(data) // body data type must match "Content-Type" header
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+    </script>
+
+</body>
+
+</html>
