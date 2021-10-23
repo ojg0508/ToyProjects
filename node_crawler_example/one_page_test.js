@@ -3,14 +3,19 @@ const mecab = require('mecab-ya');
 const request = require('request');
 const { parse } = require('node-html-parser');
 // const seedUrl = 'https://blog.ncsoft.com/';
-const seedUrl = 'http://146.56.138.212:3000';
+// const seedUrl = 'http://146.56.138.212:3000';
+const seedUrl = 'https://jaegeun.tistory.com/sitemap.xml'
 
-let mecabResult = new Map();
 
-onePageTest();
 
-async function onePageTest() {
-    await getHtmlAndMecab(seedUrl);
+
+
+
+// AnalyzePage(seedUrl);
+
+async function AnalyzePage(url, option) {
+    let mecabResult = new Map();
+    await getHtmlAndMecab(url, option, mecabResult);
 
     let sortable = [];
     for (let name in mecabResult) {
@@ -18,9 +23,56 @@ async function onePageTest() {
     }
     sortable.sort((a, b) => b[1] - a[1]);
     console.log(sortable);
+    return sortable;
 }
 
-async function getHtmlAndMecab(url) {
+
+module.exports = {
+    searchSiteMap: searchSiteMap,
+    AnalyzePage: AnalyzePage,
+    url: getUrl,
+};
+
+// test();
+let resUrl = [];
+async function test() {
+    console.log("???")
+    await searchSiteMap(seedUrl);
+    console.log(resUrl)
+    AnalyzePage(resUrl[0]);
+}
+
+function getUrl() {
+    return resUrl;
+}
+
+async function searchSiteMap(url) {
+    const response = await getResponse(url);
+    if (response.request.responseContent.statusCode != 200) return null;
+
+    const root = parse(response?.body);
+    if (!root) return;
+    let elements = root.querySelectorAll('url');
+    elements.forEach((value, idx)=>{
+        const ind = parse(value.innerHTML);
+        let loc = null;
+        let lastmod = null
+        let filterData = value.childNodes.filter(v=>{
+            if (v.rawTagName != undefined) return true;
+            else return false;
+        });
+        if (filterData.length == 2) {
+            filterData.forEach(v=>{
+                if (v.rawTagName === 'loc') {
+                    resUrl.push(v.innerText);
+                }
+            })
+        }
+    })
+    
+};
+
+async function getHtmlAndMecab(url, option, mecabResult) {
     const response = await getResponse(url);
     if (response.request.responseContent.statusCode != 200) return null;
 
@@ -34,7 +86,7 @@ async function getHtmlAndMecab(url) {
     for (let i = 0; i < elements?.length; i++) {
         if (elements[i].rawTagName != "script") {
             try {
-                await asyncMecab(elements[i].innerText);
+                await asyncMecab(elements[i].innerText, option, mecabResult);
             } catch (e) { }
         }
     }
@@ -56,14 +108,36 @@ async function getResponse(url) {
     } catch (e) { return null; }
 }
 
-async function asyncMecab(text) {
+async function asyncMecab(text, option, mecabResult) {
     return new Promise((res, rej) => {
         mecab.pos(text, function (err, result) {
             result?.forEach(value => {
-                if (value[1].indexOf('NN'/*명사*/) == 0
-                    || value[1] == "SL" || value[1] == "OL"     //외국어
-                    || value[1] == "SH" || value[1] == "OH"     //한자
-                    || value[1] == "SN" || value[1] == "ON")    //숫자
+                
+
+                if ((option.ko == true) &&
+                    (value[1].indexOf('NN'/*명사*/) == 0))   //한국어
+                {
+                    console.log(`option.ko:${option.ko}`)
+                    if (!mecabResult[value[0]]) mecabResult[value[0]] = 1;
+                    else mecabResult[value[0]]++;
+                }
+
+                if ((option.en == true) &&
+                    (value[1] == "SL" || value[1] == "OL"))     //외국어
+                {
+                    if (!mecabResult[value[0]]) mecabResult[value[0]] = 1;
+                    else mecabResult[value[0]]++;
+                }
+
+                if ((option.han == true) &&
+                    (value[1] == "SH" || value[1] == "OH"))     //한자
+                {
+                    if (!mecabResult[value[0]]) mecabResult[value[0]] = 1;
+                    else mecabResult[value[0]]++;
+                }
+                
+                if ((option.num == true) &&
+                    (value[1] == "SN" || value[1] == "ON"))     //숫자
                 {
                     if (!mecabResult[value[0]]) mecabResult[value[0]] = 1;
                     else mecabResult[value[0]]++;
